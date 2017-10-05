@@ -1,0 +1,119 @@
+<h3>班级管理</h3>
+<table class="table clazzData">
+  <thead>
+    <tr>
+      <th>编号</th>
+      <th>班级名</th>
+      <th>创建时间</th>
+      <th>班主任</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+  </tbody>
+</table>
+
+<div class="opts">
+  <button class="btn btn-danger btn-sm">删除</button>
+  <button class="btn btn-danger btn-sm">添加</button>
+  <button class="btn btn-danger btn-sm">修改</button>
+</div>
+
+
+
+<div class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">删除班级信息</h4>
+      </div>
+      <div class="modal-body">
+        <form action="" class="clazzForm">
+          <table class="table table-bordered">
+            <tr>
+              <th>编号</th>
+              <th>班级名</th>
+              <th>创建时间</th>
+              <th>班主任</th>
+            </tr>
+          </table>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary updBtn">delete</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script>
+　　
+  $(function(){
+    $.getJSON('/clazz/findAll',function(data){
+      $('.clazzData tbody').empty()
+      data.forEach(function(item){
+        var newTr = $('<tr>'
+          +'<td> <input type="checkbox" value="'+item.id+'"> </td>'
+          +'<td>'+item.name+'</td>'
+          +'<td>'+item.createDate+'</td>'
+          +'<td>'+item.teacher_id+'</td>'
+        +'</tr>')
+        $('.studentData tbody').append(newTr);
+      });
+    });
+    
+    //确认删除
+     $('.updBtn').off();
+     $('.updBtn').on('click',function(){
+      var ids = $('.clazzForm input:checkbox').toArray().map(function(item){
+         return item.value;
+       });
+      $.ajax('teacher/batchDelete',{
+        'data':ids,
+        'method':'POST',
+        'content-Type':'application/json',
+        success:function(data){
+          console.log(data);
+          $('.modal').modal('hide');
+          $('.navleft li').eq(0).trigger('click');
+        }
+     })
+    });
+　　　　
+    //给删除键绑定事件
+     $('.opts button').eq(0).off();
+     $('.opts button').eq(0).on('click',function(){
+       var ids = $('tbody input:checkbox:checked').toArray().map(function(item){
+         return item.value;
+       });
+       if(ids.length>0){
+         ids.forEach(function(item){
+          $.getJSON('clazz/findById?id='+item,function(data){
+             data.forEach(function(item){
+            var newTr = $('<tr>'
+            +'<td> <input type="checkbox" value="'+item.id+'"> </td>'
+            +'<td>'+item.name+'</td>'
+            +'<td>'+item.createDate+'</td>'
+            +'<td>'+item.teacher_id+'</td>'
+            +'</tr>')
+           $('.clazzForm tbody').append(newTr);
+          });
+           //显示模态框
+          $('.modal').modal('show')
+         })
+         });
+         
+       }else {
+        alert("请选中您要删除的信息");
+      }
+
+    });
+
+     
+     
+
+  })
+
+</script>
